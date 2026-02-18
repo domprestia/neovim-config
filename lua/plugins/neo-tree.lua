@@ -8,4 +8,13 @@ return {
     'MunifTanjim/nui.nvim',
     -- "3rd/image.nvim", -- Optional image support in preview window: See `# Preview Mode` for more information
   },
+  init = function()
+    vim.api.nvim_create_autocmd('BufAdd', {
+      callback = function()
+        vim.schedule(function()
+          vim.cmd 'Neotree show'
+        end)
+      end,
+    })
+  end,
 }
