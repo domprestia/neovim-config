@@ -12,7 +12,7 @@ return {
     vim.api.nvim_create_autocmd('BufAdd', {
       callback = function()
         vim.schedule(function()
-          vim.cmd 'Neotree show'
+          vim.cmd 'Neotree show reveal'
         end)
       end,
     })
