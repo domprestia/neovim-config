@@ -21,21 +21,7 @@ return {
 
     null_ls.setup {
       debug = false,
-      sources = {
-        null_ls.builtins.formatting.prettierd.with {
-          timeout = 10000,
-          -- prefer_local = 'node_modules/.bin',
-        },
-        require 'none-ls.diagnostics.eslint_d',
-        -- require('none-ls.diagnostics.eslint_d').with({
-        --   condition = function(utils)
-        --     -- Only run eslint_d if we have proper ESLint config files
-        --     return utils.root_has_file({ "package.json", ".eslintrc.js", ".eslintrc.json", ".eslintrc.yml", ".eslintrc.yaml", "eslint.config.js" })
-        --   end,
-        --   filetypes = { "javascript", "typescript", "javascriptreact", "typescriptreact", "vue" },
-        -- }),
-        require 'none-ls.code_actions.eslint_d',
-      },
+      sources = {},
 
       default_timeout = 60000,
       diagnostics_format = '[#{c}] #{m} (#{s})',
