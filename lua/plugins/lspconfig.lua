@@ -1,6 +1,39 @@
 -- Main LSP Configuration
 return {
   'neovim/nvim-lspconfig',
+  init = function()
+    -- Override the upstream biome lsp config which crashes on nvim 0.12.0-dev
+    -- due to vim.fs.root receiving a nested table it doesn't support.
+    vim.lsp.config('biome', {
+      root_dir = function(bufnr, on_dir)
+        local root_markers = {
+          'package-lock.json',
+          'yarn.lock',
+          'pnpm-lock.yaml',
+          'bun.lockb',
+          'bun.lock',
+          'deno.lock',
+          '.git',
+        }
+        local project_root = vim.fs.root(bufnr, root_markers) or vim.fn.getcwd()
+
+        local filename = vim.api.nvim_buf_get_name(bufnr)
+        local biome_config_files = { 'biome.json', 'biome.jsonc' }
+        local is_buffer_using_biome = vim.fs.find(biome_config_files, {
+          path = filename,
+          type = 'file',
+          limit = 1,
+          upward = true,
+          stop = vim.fs.dirname(project_root),
+        })[1]
+        if not is_buffer_using_biome then
+          return
+        end
+
+        on_dir(project_root)
+      end,
+    })
+  end,
   dependencies = {
     -- Automatically install LSPs and related tools to stdpath for Neovim
     -- Mason must be loaded before its dependents so we need to set it up here.
@@ -223,6 +256,41 @@ return {
             },
           },
         },
+      },
+      biome = {
+        -- Disable formatting so none-ls handles it (with --apply-unsafe)
+        capabilities = {
+          documentFormattingProvider = false,
+          documentRangeFormattingProvider = false,
+        },
+        root_dir = function(filename)
+          local lsputil = require 'lspconfig.util'
+          local root_markers = {
+            'package-lock.json',
+            'yarn.lock',
+            'pnpm-lock.yaml',
+            'bun.lockb',
+            'bun.lock',
+            'deno.lock',
+            '.git',
+          }
+          local project_root = lsputil.root_pattern(unpack(root_markers))(filename)
+            or vim.fn.getcwd()
+
+          -- Only start biome if there's a biome config file in the tree
+          local biome_config = vim.fs.find({ 'biome.json', 'biome.jsonc' }, {
+            path = filename,
+            type = 'file',
+            limit = 1,
+            upward = true,
+            stop = vim.fs.dirname(project_root),
+          })[1]
+          if not biome_config then
+            return nil
+          end
+
+          return project_root
+        end,
       },
     }
 
