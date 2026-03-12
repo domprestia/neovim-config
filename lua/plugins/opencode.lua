@@ -33,7 +33,7 @@ return {
     vim.o.autoread = true -- Required for `opts.events.reload`
 
     -- Recommended/example keymaps
-    vim.keymap.set({ "n", "x" }, "<C-a>", function() require("opencode").ask("@this: ") end, { desc = "Ask opencode…" })
+    vim.keymap.set({ "n", "x" }, "<C-a>", function() require("opencode").ask("@this: ", { submit = true }) end, { desc = "Ask opencode…" })
     vim.keymap.set({ "n", "x" }, "<C-x>", function() require("opencode").select() end,                          { desc = "Execute opencode action…" })
     vim.keymap.set({ "n", "t" }, "<C-.>", function() require("opencode").toggle() end,                          { desc = "Toggle opencode" })
 
@@ -42,6 +42,23 @@ return {
 
     vim.keymap.set("n", "<M-u>", function() require("opencode").command("session.half.page.up") end,   { desc = "Scroll opencode up" })
     vim.keymap.set("n", "<M-d>", function() require("opencode").command("session.half.page.down") end, { desc = "Scroll opencode down" })
+    vim.keymap.set("n", "<leader>oc", function() require("opencode").command("prompt.clear") end, { desc = "Clear opencode input" })
+    vim.keymap.set("n", "<leader>os", function() require("opencode").command("prompt.submit") end, { desc = "Submit opencode input" })
+    vim.keymap.set("n", "<leader>ot", function() require("opencode").command("agent.cycle") end, { desc = "Toggle Build/Plan" })
+    vim.keymap.set("n", "<leader>om", function()
+      require("opencode").prompt("/models")
+      vim.defer_fn(function()
+        -- Find and focus the opencode terminal window
+        for _, win in ipairs(vim.api.nvim_list_wins()) do
+          local buf = vim.api.nvim_win_get_buf(win)
+          if vim.bo[buf].buftype == "terminal" then
+            vim.api.nvim_set_current_win(win)
+            vim.cmd("startinsert")
+            return
+          end
+        end
+      end, 100)
+    end, { desc = "Change opencode model" })
 
     -- You may want these if you use the opinionated `<C-a>` and `<C-x>` keymaps above — otherwise consider `<leader>o…` (and remove terminal mode from the `toggle` keymap)
     vim.keymap.set("n", "+", "<C-a>", { desc = "Increment under cursor", noremap = true })
