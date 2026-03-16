@@ -32,10 +32,15 @@ return {
 
     vim.o.autoread = true -- Required for `opts.events.reload`
 
+    local opencode_fs = { active = false }
+
     -- Recommended/example keymaps
     vim.keymap.set({ "n", "x" }, "<C-a>", function() require("opencode").ask("@this: ", { submit = true }) end, { desc = "Ask opencode…" })
     vim.keymap.set({ "n", "x" }, "<C-x>", function() require("opencode").select() end,                          { desc = "Execute opencode action…" })
-    vim.keymap.set({ "n", "t" }, "<C-.>", function() require("opencode").toggle() end,                          { desc = "Toggle opencode" })
+    vim.keymap.set({ "n", "t" }, "<C-.>", function()
+      require("opencode").toggle()
+      opencode_fs.active = false
+    end, { desc = "Toggle opencode" })
 
     vim.keymap.set({ "n", "x" }, "go",  function() return require("opencode").operator("@this ") end,        { desc = "Add range to opencode", expr = true })
     vim.keymap.set("n",          "goo", function() return require("opencode").operator("@this ") .. "_" end, { desc = "Add line to opencode", expr = true })
@@ -59,6 +64,24 @@ return {
         end
       end, 100)
     end, { desc = "Change opencode model" })
+
+    vim.keymap.set("n", "<leader>of", function()
+      for _, win in ipairs(vim.api.nvim_list_wins()) do
+        local buf = vim.api.nvim_win_get_buf(win)
+        if vim.bo[buf].buftype == "terminal" then
+          if not opencode_fs.active then
+            vim.api.nvim_win_set_width(win, vim.o.columns)
+            opencode_fs.active = true
+          else
+            vim.api.nvim_win_set_width(win, math.floor(vim.o.columns * 0.35))
+            opencode_fs.active = false
+          end
+          vim.api.nvim_set_current_win(win)
+          vim.cmd("startinsert")
+          return
+        end
+      end
+    end, { desc = "Fullscreen opencode panel" })
 
     -- You may want these if you use the opinionated `<C-a>` and `<C-x>` keymaps above — otherwise consider `<leader>o…` (and remove terminal mode from the `toggle` keymap)
     vim.keymap.set("n", "+", "<C-a>", { desc = "Increment under cursor", noremap = true })
