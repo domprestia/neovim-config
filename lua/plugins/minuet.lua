@@ -28,17 +28,8 @@ return {
       },
       throttle = 1000,
       debounce = 400,
-      notify = 'warn',
+      notify = 'verbose',
     }
 
-    -- Override <Tab> so LuaSnip jumps take priority over minuet acceptance
-    vim.keymap.set('i', '<Tab>', function()
-      local luasnip = require 'luasnip'
-      if luasnip.locally_jumpable(1) then
-        luasnip.jump(1)
-      else
-        require('minuet.virtualtext').action.accept_suggestion()
-      end
-    end, { desc = 'Accept minuet suggestion or jump snippet' })
   end,
 }
