@@ -31,6 +31,29 @@ return {
           module = 'lazydev.integrations.blink',
           score_offset = 100,
         },
+        lsp = {
+          name = 'LSP',
+          module = 'blink.cmp.sources.lsp',
+          transform_items = function(_, items)
+            for _, item in ipairs(items) do
+              -- typescript-tools stores the import source path in data.entryNames[1].source
+              -- but doesn't populate labelDetails.description with it
+              if
+                item.data
+                and item.data.entryNames
+                and item.data.entryNames[1]
+                and type(item.data.entryNames[1]) == 'table'
+                and item.data.entryNames[1].source
+              then
+                item.labelDetails = item.labelDetails or {}
+                if not item.labelDetails.description or item.labelDetails.description == '' then
+                  item.labelDetails.description = item.data.entryNames[1].source
+                end
+              end
+            end
+            return items
+          end,
+        },
       },
     },
     completion = {
