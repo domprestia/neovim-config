@@ -27,63 +27,23 @@ return {
   config = function()
     ---@type opencode.Opts
     vim.g.opencode_opts = {
-      -- Your configuration, if any; goto definition on the type or field for details
+      server = {
+        start = function() end,
+        stop = function() end,
+        toggle = function() end,
+      },
     }
 
     vim.o.autoread = true -- Required for `opts.events.reload`
 
-    local opencode_fs = { active = false }
-
-    -- Recommended/example keymaps
+    -- Keymaps
     vim.keymap.set({ "n", "x" }, "<C-a>", function() require("opencode").ask("@this: ", { submit = true }) end, { desc = "Ask opencode…" })
     vim.keymap.set({ "n", "x" }, "<C-x>", function() require("opencode").select() end,                          { desc = "Execute opencode action…" })
-    vim.keymap.set({ "n", "t" }, "<C-.>", function()
-      require("opencode").toggle()
-      opencode_fs.active = false
-    end, { desc = "Toggle opencode" })
 
     vim.keymap.set({ "n", "x" }, "go",  function() return require("opencode").operator("@this ") end,        { desc = "Add range to opencode", expr = true })
     vim.keymap.set("n",          "goo", function() return require("opencode").operator("@this ") .. "_" end, { desc = "Add line to opencode", expr = true })
 
-    vim.keymap.set("n", "<M-u>", function() require("opencode").command("session.half.page.up") end,   { desc = "Scroll opencode up" })
-    vim.keymap.set("n", "<M-d>", function() require("opencode").command("session.half.page.down") end, { desc = "Scroll opencode down" })
-    vim.keymap.set("n", "<leader>oc", function() require("opencode").command("prompt.clear") end, { desc = "Clear opencode input" })
-    vim.keymap.set("n", "<leader>os", function() require("opencode").command("prompt.submit") end, { desc = "Submit opencode input" })
-    vim.keymap.set("n", "<leader>ot", function() require("opencode").command("agent.cycle") end, { desc = "Toggle Build/Plan" })
-    vim.keymap.set("n", "<leader>om", function()
-      require("opencode").prompt("/models")
-      vim.defer_fn(function()
-        -- Find and focus the opencode terminal window
-        for _, win in ipairs(vim.api.nvim_list_wins()) do
-          local buf = vim.api.nvim_win_get_buf(win)
-          if vim.bo[buf].buftype == "terminal" then
-            vim.api.nvim_set_current_win(win)
-            vim.cmd("startinsert")
-            return
-          end
-        end
-      end, 100)
-    end, { desc = "Change opencode model" })
-
-    vim.keymap.set("n", "<leader>of", function()
-      for _, win in ipairs(vim.api.nvim_list_wins()) do
-        local buf = vim.api.nvim_win_get_buf(win)
-        if vim.bo[buf].buftype == "terminal" then
-          if not opencode_fs.active then
-            vim.api.nvim_win_set_width(win, vim.o.columns)
-            opencode_fs.active = true
-          else
-            vim.api.nvim_win_set_width(win, math.floor(vim.o.columns * 0.35))
-            opencode_fs.active = false
-          end
-          vim.api.nvim_set_current_win(win)
-          vim.cmd("startinsert")
-          return
-        end
-      end
-    end, { desc = "Fullscreen opencode panel" })
-
-    -- You may want these if you use the opinionated `<C-a>` and `<C-x>` keymaps above — otherwise consider `<leader>o…` (and remove terminal mode from the `toggle` keymap)
+    -- Remap native increment/decrement since <C-a> and <C-x> are used by opencode
     vim.keymap.set("n", "+", "<C-a>", { desc = "Increment under cursor", noremap = true })
     vim.keymap.set("n", "-", "<C-x>", { desc = "Decrement under cursor", noremap = true })
   end,
