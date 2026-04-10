@@ -26,8 +26,8 @@ return {
           dismiss = '<A-e>',
         },
       },
-      throttle = 1000,
-      debounce = 400,
+      throttle = 200,
+      debounce = 100,
       notify = 'verbose',
     }
 
